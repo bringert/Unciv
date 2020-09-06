@@ -15,10 +15,11 @@ class TechButton(techName:String, private val techManager: TechManager, isWorldS
 
     init {
         touchable = Touchable.enabled
-        defaults().pad(10f)
-        background = ImageGetter.getRoundedEdgeTableBackground()
+        background = ImageGetter.getDrawable("OtherIcons/techButtonBackground").apply { setMinSize(0f,0f) }
+        pad(10f)
+
         if (ImageGetter.techIconExists(techName))
-            add(ImageGetter.getTechIconGroup(techName, 60f))
+            add(ImageGetter.getTechIconGroup(techName, 60f)).left()
 
         val rightSide = Table()
         val techCost = techManager.costOfTech(techName)
@@ -26,7 +27,7 @@ class TechButton(techName:String, private val techManager: TechManager, isWorldS
 
         if (isWorldScreen) {
             val percentComplete = (techCost - remainingTech) / techCost.toFloat()
-            add(ImageGetter.getProgressBarVertical(2f, 50f, percentComplete, Color.BLUE, Color.WHITE))
+            add(ImageGetter.getProgressBarVertical(2f, 50f, percentComplete, Color.BLUE, Color.WHITE)).pad(10f)
             rightSide.add(text).padBottom(5f).row()
         }
         else rightSide.add(text).height(25f).padBottom(5f).row()
@@ -54,7 +55,8 @@ class TechButton(techName:String, private val techManager: TechManager, isWorldS
             techEnabledIcons.add(ImageGetter.getConstructionImage(building.name).surroundWithCircle(techIconSize))
 
         for (improvement in gameBasics.tileImprovements.values
-                .filter { it.techRequired == techName || it.improvingTech == techName }
+                .filter { it.techRequired == techName || it.uniqueObjects.any { u -> u.params.contains(techName) }
+                        || it.improvingTech == techName }
                 .filter { it.uniqueTo==null || it.uniqueTo==civName }) {
             if (improvement.name.startsWith("Remove"))
                 techEnabledIcons.add(ImageGetter.getImage("OtherIcons/Stop")).size(techIconSize)
@@ -70,7 +72,7 @@ class TechButton(techName:String, private val techManager: TechManager, isWorldS
 
         if (isWorldScreen) rightSide.add(techEnabledIcons)
         else rightSide.add(techEnabledIcons)
-                .width(techEnabledIcons.children.size * (techIconSize+6f))
+//                .width(techEnabledIcons.children.size * (techIconSize+6f))
                 .minWidth(150f)
     }
 }
